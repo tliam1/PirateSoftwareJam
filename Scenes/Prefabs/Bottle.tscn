@@ -1,15 +1,25 @@
-[gd_scene load_steps=5 format=3 uid="uid://c6sp1878dtnmi"]
+[gd_scene load_steps=8 format=3 uid="uid://c6sp1878dtnmi"]
 
 [ext_resource type="Texture2D" uid="uid://drqm146a1luib" path="res://Sprites/bottle/BottleContainer1.png" id="1_11u7j"]
 [ext_resource type="Script" path="res://Scripts/Throwables/Bottle.gd" id="1_q8ch1"]
 [ext_resource type="Texture2D" uid="uid://bvmp6eh7u8cw4" path="res://Sprites/bottle/BottleContainer2.png" id="2_m3i6k"]
 [ext_resource type="Texture2D" uid="uid://ci63207gp3mce" path="res://Sprites/bottle/BottleContainer.png" id="2_w26ye"]
+[ext_resource type="Shader" path="res://Shaders/Bottle.gdshader" id="4_k3a2g"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xu5kh"]
+shader = ExtResource("4_k3a2g")
+shader_parameter/height = 3.0
+shader_parameter/frequency = 1.0
+shader_parameter/speed = 10.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5qxoj"]
+radius = 6.0
+height = 22.0
 
 [node name="RigidBody2D" type="RigidBody2D"]
-position = Vector2(22, 21)
 gravity_scale = 0.0
 script = ExtResource("1_q8ch1")
-fillPercent = 0.819
+fillPercent = 0.75
 
 [node name="Bottle" type="Sprite2D" parent="."]
 texture = ExtResource("1_11u7j")
@@ -20,6 +30,7 @@ texture = ExtResource("2_m3i6k")
 
 [node name="Fluid" type="Sprite2D" parent="FluidMask"]
 show_behind_parent = true
+material = SubResource("ShaderMaterial_xu5kh")
 texture = ExtResource("2_w26ye")
 centered = false
 offset = Vector2(-32, 0)
@@ -38,3 +49,6 @@ position = Vector2(0, -4)
 
 [node name="MinFill" type="Marker2D" parent="."]
 position = Vector2(0, 10)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_5qxoj")
