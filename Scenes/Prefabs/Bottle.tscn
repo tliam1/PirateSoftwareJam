@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6sp1878dtnmi"]
+
+[ext_resource type="Texture2D" uid="uid://drqm146a1luib" path="res://Sprites/bottle/BottleContainer1.png" id="1_11u7j"]
+[ext_resource type="Script" path="res://Scripts/Throwables/Bottle.gd" id="1_q8ch1"]
+[ext_resource type="Texture2D" uid="uid://bvmp6eh7u8cw4" path="res://Sprites/bottle/BottleContainer2.png" id="2_m3i6k"]
+[ext_resource type="Texture2D" uid="uid://ci63207gp3mce" path="res://Sprites/bottle/BottleContainer.png" id="2_w26ye"]
+
+[node name="RigidBody2D" type="RigidBody2D"]
+position = Vector2(22, 21)
+gravity_scale = 0.0
+script = ExtResource("1_q8ch1")
+fillPercent = 0.819
+
+[node name="Bottle" type="Sprite2D" parent="."]
+texture = ExtResource("1_11u7j")
+
+[node name="FluidMask" type="Sprite2D" parent="."]
+clip_children = 1
+texture = ExtResource("2_m3i6k")
+
+[node name="Fluid" type="Sprite2D" parent="FluidMask"]
+show_behind_parent = true
+texture = ExtResource("2_w26ye")
+centered = false
+offset = Vector2(-32, 0)
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 64)
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+offset_left = -8.0
+offset_top = -7.0
+offset_right = 8.0
+offset_bottom = 10.0
+border_width = 0.5
+
+[node name="MaxFill" type="Marker2D" parent="."]
+position = Vector2(0, -4)
+
+[node name="MinFill" type="Marker2D" parent="."]
+position = Vector2(0, 10)
