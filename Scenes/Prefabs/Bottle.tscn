@@ -29,6 +29,7 @@ clip_children = 1
 texture = ExtResource("2_m3i6k")
 
 [node name="Fluid" type="Sprite2D" parent="FluidMask"]
+self_modulate = Color(0.113725, 0.639216, 0.584314, 1)
 show_behind_parent = true
 material = SubResource("ShaderMaterial_xu5kh")
 texture = ExtResource("2_w26ye")
@@ -51,4 +52,5 @@ position = Vector2(0, -4)
 position = Vector2(0, 10)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 shape = SubResource("CapsuleShape2D_5qxoj")

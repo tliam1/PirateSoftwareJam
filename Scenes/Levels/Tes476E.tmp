@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://1pyt6nhi7b1v"]
+
+[ext_resource type="PackedScene" uid="uid://csjacn7hftps" path="res://Scenes/Prefabs/Player.tscn" id="1_n2jwg"]
+[ext_resource type="PackedScene" uid="uid://cxcnlj7ixg3a0" path="res://Scenes/Prefabs/BlockTypes/block.tscn" id="2_vmta1"]
+
+[node name="TestLevel" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)
+
+[node name="Player" parent="." instance=ExtResource("1_n2jwg")]
+position = Vector2(-111, -9)
+collision_layer = 2
+
+[node name="Blocks" type="Node2D" parent="."]
+
+[node name="block" parent="Blocks" instance=ExtResource("2_vmta1")]
+position = Vector2(-112, 8)
+rotation = 3.14159

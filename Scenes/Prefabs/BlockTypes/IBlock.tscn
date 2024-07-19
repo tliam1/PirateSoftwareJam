@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://c4bj81og7jnbr"]
+
+[ext_resource type="PackedScene" uid="uid://cxcnlj7ixg3a0" path="res://Scenes/Prefabs/BlockTypes/blockTemplate.tscn" id="1_13xh8"]
+[ext_resource type="Texture2D" uid="uid://d4disv0q3kl3h" path="res://Sprites/blocks/Layer 4.png" id="2_n3vha"]
+
+[node name="block" instance=ExtResource("1_13xh8")]
+
+[node name="Sprite2D" parent="." index="1"]
+texture = ExtResource("2_n3vha")

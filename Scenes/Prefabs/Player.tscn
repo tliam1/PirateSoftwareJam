@@ -1,0 +1,183 @@
+[gd_scene load_steps=19 format=3 uid="uid://csjacn7hftps"]
+
+[ext_resource type="Script" path="res://Scripts/player.gd" id="1_fyib3"]
+[ext_resource type="Script" path="res://Scripts/PlayerMovementData.gd" id="2_if8db"]
+[ext_resource type="Texture2D" uid="uid://cisiv6le4eqqe" path="res://Sprites/Player/Sprite-0001.png" id="2_tkovh"]
+
+[sub_resource type="Resource" id="Resource_db4do"]
+script = ExtResource("2_if8db")
+speed = 100.0
+accel = 700.0
+friction = 1000.0
+jumpVel = -250.0
+maxGravity = 1000
+gravityAccel = 10000.0
+wallJumpBuffer = 1.0
+maxWallJumpBuffer = 10.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_o4ybn"]
+radius = 5.0
+height = 14.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4dd2m"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xpok8"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mfift"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uoin6"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_il7xg"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8rc0t"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mp2di"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xy00q"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(32, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bh7wf"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e5rda"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rk3rn"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_if2m7"]
+atlas = ExtResource("2_tkovh")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tlnm7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4dd2m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xpok8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4dd2m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xpok8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4dd2m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xpok8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mfift")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uoin6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_il7xg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4dd2m")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8rc0t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mp2di")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xy00q")
+}],
+"loop": true,
+"name": &"Jump",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bh7wf")
+}],
+"loop": false,
+"name": &"Land",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e5rda")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rk3rn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_if2m7")
+}],
+"loop": true,
+"name": &"Run",
+"speed": 8.0
+}]
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_fyib3")
+movementData = SubResource("Resource_db4do")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1)
+shape = SubResource("CapsuleShape2D_o4ybn")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_tlnm7")
+animation = &"Idle"
+frame_progress = 0.989556
+
+[node name="Timers" type="Node2D" parent="."]
+
+[node name="CoyoteJumpTimer" type="Timer" parent="Timers"]
+wait_time = 0.2
+one_shot = true
+
+[node name="JumpBufferTimer" type="Timer" parent="Timers"]
+wait_time = 0.2
+one_shot = true
+
+[node name="wallJumpCoyoteJumpTimer" type="Timer" parent="Timers"]
+wait_time = 0.2
+one_shot = true
+
+[node name="wallJumpResetTimer" type="Timer" parent="Timers"]
+wait_time = 0.1
+one_shot = true
+
+[node name="RayCasts" type="Node2D" parent="."]
+
+[node name="WallCastRight" type="RayCast2D" parent="RayCasts"]
+target_position = Vector2(5.3, 0)
+
+[node name="WallCastLeft" type="RayCast2D" parent="RayCasts"]
+target_position = Vector2(-5.3, 0)
+
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
