@@ -31,6 +31,7 @@ var world;
 var gravity = 0;
 var currentAnimationState := AnimationState.IDLE;
 var spr_scale;
+var potionResource = preload("res://Scenes/Prefabs/Potions/Bottle.tscn")
 
 func _ready():
 	world = get_parent();
@@ -48,6 +49,7 @@ func _physics_process(delta):
 		frameChecks(delta);
 #		SlidyFloor();
 #		GunForce(delta, false);
+		LaunchPotion()
 		WallSliding(dir);
 		JumpCheck(delta, false);
 		Movement(delta, dir);
@@ -81,11 +83,11 @@ func _physics_process(delta):
 		
 		
 func SpeedControl(delta):
-	if(abs(velocity.y) > 350):
-		velocity.y = move_toward(velocity.y, 350 * sign(velocity.y), movementData.friction * delta);
-	if(abs(velocity.x) > 250):
+	if(abs(velocity.y) > 500):
+		velocity.y = move_toward(velocity.y, 500 * sign(velocity.y), movementData.friction * delta);
+	if(abs(velocity.x) > 500):
 		# velocity.x = 250* sign(velocity.x);
-		velocity.x = move_toward(velocity.x, 250 * sign(velocity.x), movementData.friction * delta);
+		velocity.x = move_toward(velocity.x, 500 * sign(velocity.x), movementData.friction * delta);
 		
 func ApplyGravity(delta):
 	# print(velocity.x);
@@ -133,6 +135,21 @@ func WallCasting():
 func GetTileSet(tileset):
 	movementData.floorWallTiles = tileset;
 
+
+func LaunchPotion():
+	if Input.is_action_just_pressed("LeftMouseClick"):
+		print("THROWN")
+		var potionInst = potionResource.instantiate();
+		get_tree().get_root().add_child(potionInst);
+		potionInst.global_position = global_position
+		var direction : Vector2 = get_global_mouse_position() - global_position
+		potionInst.InitializeForce(direction.normalized(), movementData.throwForce)
+
+
+func AddForces(dir : Vector2, speed : float):
+	velocity += dir * speed
+	pass
+	
 #func GunForce(delta, override):
 #
 #	#print(gun.rotation_degrees);
@@ -236,7 +253,7 @@ func AnimationController(dir):
 	elif velocity.x < 0:
 		anim.flip_h = true
 		
-	if(velocity.x != 0 and currentAnimationState != AnimationState.LAND):
+	if(velocity.x != 0 and currentAnimationState != AnimationState.LAND and is_on_floor_only()):
 		currentAnimationState = AnimationState.RUN
 		anim.play("Run");
 	elif(is_on_floor() and currentAnimationState != AnimationState.LAND):

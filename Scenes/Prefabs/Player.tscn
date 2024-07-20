@@ -14,6 +14,7 @@ maxGravity = 1000
 gravityAccel = 10000.0
 wallJumpBuffer = 1.0
 maxWallJumpBuffer = 10.0
+throwForce = 100.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_o4ybn"]
 radius = 5.0

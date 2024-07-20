@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3 uid="uid://c6sp1878dtnmi"]
+
+[ext_resource type="Script" path="res://Scripts/Throwables/Bottle.gd" id="1_pynhu"]
+[ext_resource type="Texture2D" uid="uid://drqm146a1luib" path="res://Sprites/bottle/BottleContainer1.png" id="2_dy88j"]
+[ext_resource type="Texture2D" uid="uid://bvmp6eh7u8cw4" path="res://Sprites/bottle/BottleContainer2.png" id="3_ttifj"]
+[ext_resource type="Shader" path="res://Shaders/Bottle.gdshader" id="4_smw5e"]
+[ext_resource type="Texture2D" uid="uid://ci63207gp3mce" path="res://Sprites/bottle/BottleContainer.png" id="5_og5th"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xu5kh"]
+shader = ExtResource("4_smw5e")
+shader_parameter/height = 3.0
+shader_parameter/frequency = 1.0
+shader_parameter/speed = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cfwew"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_o1veg"]
+radius = 50.0
+
+[node name="Bottle" type="Node2D"]
+scale = Vector2(0.4, 0.4)
+script = ExtResource("1_pynhu")
+fillPercent = 0.75
+setChildrenScale = 0.4
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+collision_layer = 4
+gravity_scale = 0.0
+max_contacts_reported = 1
+contact_monitor = true
+
+[node name="Bottle" type="Sprite2D" parent="RigidBody2D"]
+texture = ExtResource("2_dy88j")
+
+[node name="FluidMask" type="Sprite2D" parent="RigidBody2D/Bottle"]
+clip_children = 1
+texture = ExtResource("3_ttifj")
+
+[node name="Fluid" type="Sprite2D" parent="RigidBody2D/Bottle/FluidMask"]
+self_modulate = Color(0.113725, 0.639216, 0.584314, 1)
+show_behind_parent = true
+material = SubResource("ShaderMaterial_xu5kh")
+texture = ExtResource("5_og5th")
+centered = false
+offset = Vector2(-32, 0)
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 64)
+
+[node name="ReferenceRect" type="ReferenceRect" parent="RigidBody2D"]
+offset_left = -8.0
+offset_top = -7.0
+offset_right = 8.0
+offset_bottom = 10.0
+border_width = 0.5
+
+[node name="MaxFill" type="Marker2D" parent="RigidBody2D"]
+position = Vector2(0, -4)
+
+[node name="MinFill" type="Marker2D" parent="RigidBody2D"]
+position = Vector2(0, 10)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
+position = Vector2(0, 4)
+shape = SubResource("CircleShape2D_cfwew")
+
+[node name="ExplosionArea" type="Area2D" parent="RigidBody2D"]
+collision_layer = 8
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D/ExplosionArea"]
+shape = SubResource("CircleShape2D_o1veg")
+
+[connection signal="body_entered" from="RigidBody2D/ExplosionArea" to="." method="_on_explosion_area_body_entered"]
+[connection signal="body_exited" from="RigidBody2D/ExplosionArea" to="." method="_on_explosion_area_body_exited"]
