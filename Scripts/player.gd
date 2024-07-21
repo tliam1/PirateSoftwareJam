@@ -32,6 +32,8 @@ var gravity = 0;
 var currentAnimationState := AnimationState.IDLE;
 var spr_scale;
 var potionResource = preload("res://Scenes/Prefabs/Potions/Bottle.tscn")
+var gameManager : Node2D
+var currentBlastForce : Vector2 = Vector2.ZERO
 
 func _ready():
 	world = get_parent();
@@ -39,7 +41,9 @@ func _ready():
 	movementData.canMove = true;
 	anim.visible = true;
 	spr_scale = anim.scale;
-	
+	gameManager = get_tree().get_root().find_child("GameManager", true, false)
+
+
 func _physics_process(delta):
 	movementData.prevOnFloor = movementData.onfloor;
 	movementData.onfloor = is_on_floor();
@@ -58,6 +62,7 @@ func _physics_process(delta):
 		SpeedControl(delta);
 		# cellData(delta);
 		squishAndStretch(delta);
+		SetSmoothForce()
 	elif(!movementData.alive and anim.visible):
 		gravity = 0;
 		velocity = Vector2.ZERO;
@@ -83,11 +88,11 @@ func _physics_process(delta):
 		
 		
 func SpeedControl(delta):
-	if(abs(velocity.y) > 500):
-		velocity.y = move_toward(velocity.y, 500 * sign(velocity.y), movementData.friction * delta);
-	if(abs(velocity.x) > 500):
+	if(abs(velocity.y) > 200):
+		velocity.y = move_toward(velocity.y, 200 * sign(velocity.y), movementData.friction * 5 * delta);
+	if(abs(velocity.x) > 150):
 		# velocity.x = 250* sign(velocity.x);
-		velocity.x = move_toward(velocity.x, 500 * sign(velocity.x), movementData.friction * delta);
+		velocity.x = move_toward(velocity.x, 150 * sign(velocity.x), movementData.friction * 5 * delta);
 		
 func ApplyGravity(delta):
 	# print(velocity.x);
@@ -138,16 +143,29 @@ func GetTileSet(tileset):
 
 func LaunchPotion():
 	if Input.is_action_just_pressed("LeftMouseClick"):
-		print("THROWN")
+		var potionEffect = gameManager.GetCurrentPotionEffect()
+		if potionEffect == "null":
+			return
 		var potionInst = potionResource.instantiate();
 		get_tree().get_root().add_child(potionInst);
 		potionInst.global_position = global_position
 		var direction : Vector2 = get_global_mouse_position() - global_position
-		potionInst.InitializeForce(direction.normalized(), movementData.throwForce)
+		potionInst.InitializeForce(direction.normalized(), movementData.throwForce, potionEffect)
+		gameManager.NextPotion()
 
+func SetSmoothForce():
+	if (currentBlastForce.length() > 20):
+		velocity += currentBlastForce
+		currentBlastForce *= .75
+	else:
+		currentBlastForce = Vector2.ZERO
 
 func AddForces(dir : Vector2, speed : float):
-	velocity += dir * speed
+	var initVel = velocity
+	var force = dir * speed
+	var targetVel = initVel + force
+	currentBlastForce = force
+	#velocity += dir * speed
 	pass
 	
 #func GunForce(delta, override):

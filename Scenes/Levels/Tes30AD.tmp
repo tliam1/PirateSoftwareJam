@@ -9,7 +9,7 @@
 
 [node name="GameManager" type="Node2D"]
 script = ExtResource("1_vjac8")
-potionList = Array[String](["GrowthEffectPotion", "GrowthEffectPotion", "GrowthEffectPotion", "GrowthEffectPotion", "GrowthEffectPotion"])
+potionList = Array[String](["BlastEffect", "BlastEffect", "BlastEffect", "BlastEffect", "BlastEffect"])
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(3.5, 3.5)

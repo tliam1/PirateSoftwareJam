@@ -15,6 +15,8 @@ extends Node2D
 @onready var rb : RigidBody2D = $RigidBody2D
 @onready var explosionArea : Area2D = $RigidBody2D/ExplosionArea
 @onready var explosionCollider : CollisionShape2D = $RigidBody2D/ExplosionArea/CollisionShape2D
+
+
 # @onready var anim = $AnimationPlayer
 #hidden
 var potionHeight
@@ -22,16 +24,18 @@ var potionWidth
 var target : Vector2 = Vector2.ZERO
 var explosionEffectBodies : Array = []
 var potionEffectHandler : PotionEffects = PotionEffects.new()
-
+var activePotionEffect : String
+var gameManager : Node2D = null
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	gameManager = get_tree().get_root().find_child("GameManager", true, false)
 	potionHeight = reference_rect.get_rect().size.y
 	potionWidth = reference_rect.get_rect().size.x
 	SetScale()
 	# angular_velocity = 15
 	pass # Replace with function body.
 
-#
+
 func SetScale():
 	col.scale *= setChildrenScale
 	fluidHolder.scale *= setChildrenScale
@@ -39,9 +43,10 @@ func SetScale():
 	pass
 
 
-func InitializeForce(dir : Vector2, speed : float):
+func InitializeForce(dir : Vector2, speed : float, potionEffect : String):
 	rb.apply_impulse(dir * speed)
 	rb.angular_velocity = randf_range(5,15) * sign(dir.x)
+	activePotionEffect = potionEffect
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -69,12 +74,6 @@ func _process(delta):
 		target = target.lerp(adjustedMaxFill.lerp(adjustMinFill, 1 - fillPercent), delta * 4)
 	fluid.global_position += target
 	
-	if(rb.get_contact_count() > 0):
-		rb.contact_monitor = false
-		rb.max_contacts_reported = 0
-		# explode!
-		print("Bottle Collided")
-	
 	queue_redraw()
 	pass
 
@@ -84,18 +83,41 @@ func get_rotated_height() -> Vector2:
 
 
 func _on_explosion_area_body_entered(body):
-	if !explosionEffectBodies.has(body):
-		explosionEffectBodies.append(body)
-		# print("Entered" + str(body))
-	pass # Replace with function body.
+	return
+#	if(rb.get_contact_count() < 0):
+#		return
+#	if !explosionEffectBodies.has(body):
+#		explosionEffectBodies.append(body)
+#		# print("Entered" + str(body))
+#	pass # Replace with function body.
 
 
 func _on_explosion_area_body_exited(body):
-	if explosionEffectBodies.has(body):
-		explosionEffectBodies.erase(body)
-		# print("Exit " + str(body))
-	
-	pass # Replace with function body.
+	return
+#	if(rb.get_contact_count() < 0):
+#		return
+#	if explosionEffectBodies.has(body):
+#		explosionEffectBodies.erase(body)
+#		# print("Exit " + str(body))
+#
+#	pass # Replace with function body.
 
 func _draw():
 	draw_circle(rb.position, explosionCollider.shape.radius, Color.RED)
+
+
+func _on_rigid_body_2d_body_entered(body):
+	rb.contact_monitor = false
+	rb.max_contacts_reported = 0
+	# explode!
+	if activePotionEffect in potionEffectHandler.ActiveCallable:
+		potionEffectHandler.SetExplosionPosition(rb.global_position)
+		potionEffectHandler.InitializePlayer(gameManager.player)
+		if(explosionArea.get_overlapping_bodies().size() > 1):
+			potionEffectHandler.ActiveCallable[activePotionEffect].call(explosionArea.get_overlapping_bodies())
+		else:
+			potionEffectHandler.ActiveCallable[activePotionEffect].call([body])
+		print(explosionArea.get_overlapping_bodies())
+#	else:
+		call_deferred("queue_free")
+#		print("RAN ELSE TO FREE QUEUE")
