@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://xcox8nct6c2b"]
+
+[ext_resource type="Script" path="res://Scripts/Managers/GameManager.gd" id="1_gt7oq"]
+[ext_resource type="PackedScene" uid="uid://csjacn7hftps" path="res://Scenes/Prefabs/Player/Player.tscn" id="2_m2n5u"]
+[ext_resource type="Script" path="res://Scripts/blockData/blockManager.gd" id="3_b0vwt"]
+[ext_resource type="PackedScene" uid="uid://cnfhbsqkm1oi8" path="res://Scenes/Prefabs/Player/playerShadow.tscn" id="8_pdu5m"]
+
+[node name="GameManager" type="Node2D"]
+script = ExtResource("1_gt7oq")
+potionList = Array[String](["SpawnBlockPotion", "SpawnBlockPotion", "SpawnBlockPotion", "SpawnBlockPotion", "SpawnBlockPotion"])
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(3.5, 3.5)
+
+[node name="Player" parent="." instance=ExtResource("2_m2n5u")]
+position = Vector2(-111, -9)
+collision_layer = 2
+
+[node name="BlockManager" type="Node2D" parent="."]
+script = ExtResource("3_b0vwt")
+
+[node name="playerShadow" parent="." instance=ExtResource("8_pdu5m")]
+position = Vector2(-89, -10)

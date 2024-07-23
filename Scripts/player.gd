@@ -24,6 +24,9 @@ var world;
 @onready var wallJumpResetTimer = $Timers/wallJumpResetTimer
 @onready var wallJumpCoyoteJumpTimer = $Timers/wallJumpCoyoteJumpTimer
 @onready var col = $CollisionShape2D
+@onready var reset_potion_effects_timer = $Timers/ResetPotionEffectsTimer
+@onready var bottle_icon_anim = $bottleIconAnim
+@onready var shadowStateCoolDownTimer = $Timers/ShadowStateCoolDownTimer
 #@onready var ice_detector = $IceDetector
 #@onready var cam = $PhysicsCam
 #@onready var slide_particles = $SlideParticles
@@ -34,14 +37,19 @@ var spr_scale;
 var potionResource = preload("res://Scenes/Prefabs/Potions/Bottle.tscn")
 var gameManager : Node2D
 var currentBlastForce : Vector2 = Vector2.ZERO
-
+var shadowDirVector : Vector2 = Vector2.ZERO # for launch after meeting shadow
+#potionModifiers
+var potionGravityMod : float = 1
+var potionJumpMod : float = 1
+var tween : Tween
 func _ready():
-	world = get_parent();
+	world = get_parent()
 	movementData.alive = true;
 	movementData.canMove = true;
 	anim.visible = true;
 	spr_scale = anim.scale;
 	gameManager = get_tree().get_root().find_child("GameManager", true, false)
+	bottle_icon_anim.play("IdleRight")
 
 
 func _physics_process(delta):
@@ -53,6 +61,7 @@ func _physics_process(delta):
 		frameChecks(delta);
 #		SlidyFloor();
 #		GunForce(delta, false);
+		PlaceShadow()
 		LaunchPotion()
 		WallSliding(dir);
 		JumpCheck(delta, false);
@@ -67,41 +76,86 @@ func _physics_process(delta):
 		gravity = 0;
 		velocity = Vector2.ZERO;
 		anim.visible = false;
+	elif (gameManager.GetShadowState() and !movementData.canMove):
+		if(velocity.length() > 0 or tween == null or !tween.is_running()):
+			print("running tween")
+			gravity = 0
+			velocity = Vector2.ZERO
+			# move toward the shadow with tweening
+			var target : Vector2 = gameManager.GetShadowPosition()
+			shadowDirVector = target - global_position
+			tween = create_tween()
+			tween.tween_property(self, "global_position", target, 0.18).from(global_position).set_trans(Tween.TRANS_LINEAR)
+			set_collision_layer_value(2, false)
+			set_collision_mask_value(1, false)
+			tween.finished.connect(OnShadowStepFinish)
+		elif (global_position.distance_to(gameManager.GetShadowPosition()) < 2 and tween != null):
+			tween.stop()
+			print("CANCELLED TWEEN")
+			OnShadowStepFinish()
+#		else:
+#			gameManager.SetShadowState(false)
+#			movementData.canMove = true
+#			print("Failed to start shadow step")
 
-	elif(movementData.alive): # world.levelOver and
-		movementData.canMove = false;
-		gravity = 0;
-		velocity = Vector2.ZERO;
-		modulate.a = move_toward(modulate.a, 0, delta * 1);
-#		player.global_position.x = move_toward(player.global_position.x,portal_pos.x,delta*8);
-#		player.global_position.y = move_toward(player.global_position.y,portal_pos.y,delta*8);
-		anim.scale.y = move_toward(anim.scale.y, spr_scale.y, delta * 1.5);
-		anim.scale.x = move_toward(anim.scale.x, spr_scale.x,  delta * 1.5);
-#		gun.modulate.a = move_toward(gun.modulate.a, 0, delta * 1);
-#		cam.position.x = move_toward(cam.position.x, 0, delta);
-#		cam.position.y = move_toward(cam.position.y, 0, delta);
-#		cam.drag_left_margin = move_toward(cam.drag_left_margin, 0, delta * 3);
-#		cam.drag_right_margin = move_toward(cam.drag_right_margin, 0, delta * 3);
-#		cam.drag_top_margin = move_toward(cam.drag_top_margin, 0, delta * 3);
-#		cam.drag_bottom_margin = move_toward(cam.drag_bottom_margin, 0, delta * 3);
+#	elif(movementData.alive): # world.levelOver and
+#		movementData.canMove = false;
+#		gravity = 0;
+#		velocity = Vector2.ZERO;
+#		modulate.a = move_toward(modulate.a, 0, delta * 1);
+##		player.global_position.x = move_toward(player.global_position.x,portal_pos.x,delta*8);
+##		player.global_position.y = move_toward(player.global_position.y,portal_pos.y,delta*8);
+#		anim.scale.y = move_toward(anim.scale.y, spr_scale.y, delta * 1.5);
+#		anim.scale.x = move_toward(anim.scale.x, spr_scale.x,  delta * 1.5);
+##		gun.modulate.a = move_toward(gun.modulate.a, 0, delta * 1);
+##		cam.position.x = move_toward(cam.position.x, 0, delta);
+##		cam.position.y = move_toward(cam.position.y, 0, delta);
+##		cam.drag_left_margin = move_toward(cam.drag_left_margin, 0, delta * 3);
+##		cam.drag_right_margin = move_toward(cam.drag_right_margin, 0, delta * 3);
+##		cam.drag_top_margin = move_toward(cam.drag_top_margin, 0, delta * 3);
+##		cam.drag_bottom_margin = move_toward(cam.drag_bottom_margin, 0, delta * 3);
 	move_and_slide();
 		
 		
 func SpeedControl(delta):
-	if(abs(velocity.y) > 200):
-		velocity.y = move_toward(velocity.y, 200 * sign(velocity.y), movementData.friction * 5 * delta);
-	if(abs(velocity.x) > 150):
+	if(abs(velocity.y) > 300):
+		velocity.y = move_toward(velocity.y, 300 * sign(velocity.y), movementData.friction * 5 * delta);
+	if(abs(velocity.x) > 250):
 		# velocity.x = 250* sign(velocity.x);
-		velocity.x = move_toward(velocity.x, 150 * sign(velocity.x), movementData.friction * 5 * delta);
-		
+		velocity.x = move_toward(velocity.x, 250 * sign(velocity.x), movementData.friction * 5 * delta);
+
+func OnShadowStepFinish():
+	print("Finished Tweening")
+	gravity = 0
+	movementData.canMove = true
+	gameManager.SetShadowState(false)
+	set_collision_layer_value(2, true)
+	set_collision_mask_value(1, true)
+	shadowDirVector = -shadowDirVector.normalized()
+#	if(shadowDirVector.y < 0):
+#		shadowDirVector.y *= -1
+#	var dir : float = Input.get_axis("ui_left", "ui_right")
+#	if(dir == 0):
+#		shadowDirVector.x *= 0.5
+#	else:
+#		shadowDirVector.x *= 0.35 * dir * -sign(shadowDirVector.x)
+#	shadowDirVector.y *= 1.85
+#	shadowDirVector.y = clampf(shadowDirVector.y, 1, 1.85)
+	# print(shadowDirVector.y)
+	AddForces(shadowDirVector, movementData.jumpVel * 3)
+	shadowStateCoolDownTimer.start()
+
 func ApplyGravity(delta):
 	# print(velocity.x);
 	if not is_on_floor() and not movementData.wallSliding:
-		gravity = move_toward(gravity,movementData.maxGravity, movementData.gravityAccel * delta);
-		velocity.y += gravity * delta;
+		var scalar : float = 1
+		if (!shadowStateCoolDownTimer.is_stopped()):
+			scalar = 0.3
+		gravity = move_toward(gravity,movementData.maxGravity, movementData.gravityAccel * scalar * delta);
+		velocity.y += gravity / potionGravityMod * delta;
 	elif not is_on_floor() and movementData.wallSliding:
 		gravity = movementData.maxGravity * 3.2;
-		velocity.y = gravity * delta;
+		velocity.y = gravity / potionGravityMod * delta;
 	if is_on_floor():
 		gravity = 0;
 
@@ -141,6 +195,17 @@ func GetTileSet(tileset):
 	movementData.floorWallTiles = tileset;
 
 
+func PlaceShadow():
+	if(!movementData.canCastShadow):
+		return
+	if Input.is_action_just_pressed("placeShadow"):
+		if (!gameManager.GetShadowState()):
+			gameManager.SetPlayerShadow()
+		else:
+			movementData.canCastShadow = false # TODO SHOW VISIBLE PLAYER SHADOW WHEN IT IS AVALIABLE
+			movementData.canMove = false
+			pass #
+
 func LaunchPotion():
 	if Input.is_action_just_pressed("LeftMouseClick"):
 		var potionEffect = gameManager.GetCurrentPotionEffect()
@@ -154,16 +219,16 @@ func LaunchPotion():
 		gameManager.NextPotion()
 
 func SetSmoothForce():
-	if (currentBlastForce.length() > 20):
-		velocity += currentBlastForce
-		currentBlastForce *= .75
+	if (currentBlastForce.length() > 0):
+		velocity += currentBlastForce.limit_length(75)
+		currentBlastForce -= currentBlastForce.limit_length(75)
 	else:
 		currentBlastForce = Vector2.ZERO
 
 func AddForces(dir : Vector2, speed : float):
-	var initVel = velocity
+#	var initVel = velocity
 	var force = dir * speed
-	var targetVel = initVel + force
+#	var targetVel = initVel + force
 	currentBlastForce = force
 	#velocity += dir * speed
 	pass
@@ -219,7 +284,7 @@ func JumpCheck(delta, override):
 	var coyoteJumpped = false;
 	if is_on_floor() or coyoteJumpTimer.time_left > 0.0:
 		if Input.is_action_just_pressed("Jump") or override:
-			velocity.y = movementData.jumpVel;
+			velocity.y = movementData.jumpVel * potionJumpMod;
 			movementData.jumping = true;
 			if(anim.scale != spr_scale):
 				anim.scale = spr_scale;
@@ -240,7 +305,7 @@ func JumpCheck(delta, override):
 			movementData.wallSliding = false;
 			velocity.x = 0;
 			gravity = 0;
-			velocity.y = movementData.jumpVel;
+			velocity.y = movementData.jumpVel * potionJumpMod;
 			velocity.x = -movementData.wallNormal.x * movementData.jumpVel/1.8;
 			movementData.jumping = true;
 			if !wallJumpResetTimer.is_stopped():
@@ -249,7 +314,7 @@ func JumpCheck(delta, override):
 			return;
 			
 	if !is_on_floor() and !movementData.onWall:
-		if !Input.is_action_pressed("Jump") and velocity.y < movementData.jumpVel/3:
+		if (!Input.is_action_pressed("Jump") or !shadowStateCoolDownTimer.is_stopped()) and velocity.y < movementData.jumpVel/3 :
 			velocity.y = move_toward(velocity.y,movementData.jumpVel/3, movementData.friction * 10 * delta);
 		if Input.is_action_just_pressed("Jump") and !coyoteJumpped:
 			if(!jumpBufferTimer.is_stopped()):
@@ -266,10 +331,14 @@ func Movement(delta, dir):
 			velocity.x = move_toward(velocity.x,0, movementData.friction * delta);
 
 func AnimationController(dir):
-	if velocity.x > 0: 
+	if velocity.x > 0 and anim.flip_h: 
 		anim.flip_h = false
-	elif velocity.x < 0:
+		bottle_icon_anim.stop()
+		bottle_icon_anim.play("IdleRight")
+	elif velocity.x < 0 and !anim.flip_h:
 		anim.flip_h = true
+		bottle_icon_anim.stop()
+		bottle_icon_anim.play("IdleLeft")
 		
 	if(velocity.x != 0 and currentAnimationState != AnimationState.LAND and is_on_floor_only()):
 		currentAnimationState = AnimationState.RUN
@@ -284,7 +353,8 @@ func AnimationController(dir):
 func frameChecks(delta):
 	# WALL CASTING NEEDS TO BE BEFORE THE FRAME CHECKS AT ALL TIMES
 	WallCasting();
-	
+	if (movementData.onfloor and !movementData.canCastShadow):
+		movementData.canCastShadow = true
 	if movementData.prevOnFloor and !movementData.onfloor and !movementData.jumping:
 		if !coyoteJumpTimer.is_stopped():
 			coyoteJumpTimer.stop();
@@ -422,3 +492,25 @@ func AddForce(dir, speed):
 #
 #func GetCam() -> Node2D:
 #	return cam;
+
+func SetGravityMod(mod : float):
+	potionGravityMod = mod
+	StartPlayerEffectTimer()
+
+
+func SetJumpMod(mod : float):
+	potionJumpMod = mod
+	StartPlayerEffectTimer()
+
+
+func StartPlayerEffectTimer():
+	# hello player! yes, this is intended. I want to see how people chain together potion effects
+	# and manage the timer
+	if !reset_potion_effects_timer.is_stopped():
+		reset_potion_effects_timer.stop()
+	reset_potion_effects_timer.start() 
+
+func _on_reset_potion_effects_timer_timeout():
+	potionGravityMod = 1
+	potionJumpMod = 1
+	pass # Replace with function body.

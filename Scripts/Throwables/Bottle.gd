@@ -107,12 +107,15 @@ func _draw():
 
 
 func _on_rigid_body_2d_body_entered(body):
-	rb.contact_monitor = false
+	#rb.contact_monitor = false
+	rb.call_deferred("set_contact_monitor", false)
+	# call_deferred("rb.set_contact_monitor", false)
 	rb.max_contacts_reported = 0
 	# explode!
 	if activePotionEffect in potionEffectHandler.ActiveCallable:
 		potionEffectHandler.SetExplosionPosition(rb.global_position)
 		potionEffectHandler.InitializePlayer(gameManager.player)
+		potionEffectHandler.SetRoot(get_tree().get_root())
 		if(explosionArea.get_overlapping_bodies().size() > 1):
 			potionEffectHandler.ActiveCallable[activePotionEffect].call(explosionArea.get_overlapping_bodies())
 		else:

@@ -1,12 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxcnlj7ixg3a0"]
+[gd_scene load_steps=3 format=3 uid="uid://cxcnlj7ixg3a0"]
 
 [ext_resource type="Script" path="res://Scripts/blockData/block.gd" id="1_fbnuo"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_byi1x"]
+
 [node name="block" type="Node2D"]
+material = SubResource("ShaderMaterial_byi1x")
 script = ExtResource("1_fbnuo")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="."]
-collision_mask = 3
 mass = 10.0
 gravity_scale = 0.0
 contact_monitor = true

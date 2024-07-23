@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://d1x1aptc4aohh"]
+
+[ext_resource type="Shader" path="res://Shaders/rainbowBlock.gdshader" id="1_048rx"]
+[ext_resource type="Script" path="res://Scripts/Collectables/unlockGem.gd" id="1_s8w0u"]
+[ext_resource type="Texture2D" uid="uid://c15coao4hq8yk" path="res://Sprites/unlocker.png" id="2_g768b"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_do3k4"]
+shader = ExtResource("1_048rx")
+shader_parameter/strength = 0.5
+shader_parameter/speed = 0.5
+shader_parameter/angle = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7xrys"]
+radius = 6.0
+
+[node name="unlockGem" type="Node2D"]
+script = ExtResource("1_s8w0u")
+
+[node name="gemSprite" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_do3k4")
+texture = ExtResource("2_g768b")
+
+[node name="Area2D" type="Area2D" parent="gemSprite"]
+collision_layer = 16
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="gemSprite/Area2D"]
+shape = SubResource("CircleShape2D_7xrys")
+
+[connection signal="body_entered" from="gemSprite/Area2D" to="." method="_on_area_2d_body_entered"]

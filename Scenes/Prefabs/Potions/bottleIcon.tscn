@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3 uid="uid://buoae63i00x1m"]
+
+[ext_resource type="Script" path="res://Scripts/Throwables/bottleIcon.gd" id="1_5chv0"]
+[ext_resource type="Texture2D" uid="uid://drqm146a1luib" path="res://Sprites/bottle/BottleContainer1.png" id="2_a6qm3"]
+[ext_resource type="Texture2D" uid="uid://bvmp6eh7u8cw4" path="res://Sprites/bottle/BottleContainer2.png" id="3_w1uy4"]
+[ext_resource type="Shader" path="res://Shaders/Bottle.gdshader" id="4_ybcy3"]
+[ext_resource type="Texture2D" uid="uid://ci63207gp3mce" path="res://Sprites/bottle/BottleContainer.png" id="5_rwwps"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yac3n"]
+shader = ExtResource("4_ybcy3")
+shader_parameter/height = 3.0
+shader_parameter/frequency = 1.0
+shader_parameter/speed = 10.0
+
+[node name="bottleIcon" type="Node2D"]
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_5chv0")
+fillPercent = 0.7
+
+[node name="Bottle" type="Sprite2D" parent="."]
+z_index = 5
+texture = ExtResource("2_a6qm3")
+
+[node name="FluidMask" type="Sprite2D" parent="Bottle"]
+clip_children = 1
+z_index = 4
+texture = ExtResource("3_w1uy4")
+
+[node name="Fluid" type="Sprite2D" parent="Bottle/FluidMask"]
+self_modulate = Color(0.113725, 0.639216, 0.584314, 1)
+show_behind_parent = true
+material = SubResource("ShaderMaterial_yac3n")
+texture = ExtResource("5_rwwps")
+centered = false
+offset = Vector2(-32, 0)
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 64)
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+offset_left = -8.0
+offset_top = -7.0
+offset_right = 8.0
+offset_bottom = 10.0
+border_width = 0.5
+
+[node name="MaxFill" type="Marker2D" parent="."]
+position = Vector2(0, -4)
+
+[node name="MinFill" type="Marker2D" parent="."]
+position = Vector2(0, 10)

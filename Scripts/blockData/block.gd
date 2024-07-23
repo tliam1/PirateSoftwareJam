@@ -4,6 +4,8 @@ extends Node2D
 @onready var polygonCol = $RigidBody2D/CollisionPolygon2D
 @onready var rb : RigidBody2D = $RigidBody2D
 
+var finalBlockShader : Shader = preload("res://Shaders/rainbowBlock.gdshader")
+@export var isFinalBlock : bool
 
 var original_polygon_points = []
 var childrenScale : Vector2 = Vector2(1.0, 1.0)
@@ -14,20 +16,34 @@ func _ready():
 	var bitmap = BitMap.new()
 	bitmap.create_from_image_alpha(image)
 	var polys = bitmap.opaque_to_polygons(Rect2(Vector2.ZERO, spr.texture.get_size()), 5)
-	print(polys[0])
-	polygonCol.polygon = polys[0]
-	polygonCol.position -= spr.texture.get_size()/2
+	# print(polys[0])
+	call_deferred("SetPolygons", polys)
+#	polygonCol.polygon = polys[0]
+#	polygonCol.position -= spr.texture.get_size()/2
+#	if isFinalBlock:
+#		var shaderMaterial = ShaderMaterial.new()
+#		shaderMaterial.shader = finalBlockShader
+#		print(shaderMaterial.shader)
+#		spr.material = shaderMaterial
+#		print(spr.material)
+#		print(spr.material.shader)
 	# AddForces(Vector2(randf_range(-10,10),randf_range(-10,10)), 2)
 	pass # Replace with function body.
 
 func SetScale(newScale : float):
-	print(str(self) + " was given new scale")
+	# print(str(self) + " was given new scale")
 	childrenScale += Vector2(newScale, newScale)
 #	spr.scale = newScale
 #	polygonCol.scale = newScale
 	pass
 
-
+func SetPolygons(polys):
+	polygonCol.polygon = polys[0]
+	polygonCol.position -= spr.texture.get_size()/2
+	if isFinalBlock:
+		var shaderMaterial = ShaderMaterial.new()
+		shaderMaterial.shader = finalBlockShader
+		spr.material = shaderMaterial
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

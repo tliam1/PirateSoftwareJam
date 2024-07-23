@@ -31,10 +31,12 @@ max_contacts_reported = 1
 contact_monitor = true
 
 [node name="Bottle" type="Sprite2D" parent="RigidBody2D"]
+z_index = 5
 texture = ExtResource("2_dy88j")
 
 [node name="FluidMask" type="Sprite2D" parent="RigidBody2D/Bottle"]
 clip_children = 1
+z_index = 5
 texture = ExtResource("3_ttifj")
 
 [node name="Fluid" type="Sprite2D" parent="RigidBody2D/Bottle/FluidMask"]

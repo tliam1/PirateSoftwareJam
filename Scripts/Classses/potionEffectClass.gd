@@ -26,6 +26,16 @@ var ActiveCallable : Dictionary = {
 
 var player : Node2D
 var explosionPosition : Vector2 
+var blockSet : Array[Resource] = [
+	preload("res://Scenes/Prefabs/BlockTypes/SquareLargeblock.tscn"),
+	preload("res://Scenes/Prefabs/BlockTypes/SquareMediumblock.tscn"),
+	preload("res://Scenes/Prefabs/BlockTypes/L-block.tscn"),
+	preload("res://Scenes/Prefabs/BlockTypes/IBlock.tscn")
+	]
+var root 
+
+func SetRoot(r):
+	root = r
 
 func InitializePlayer(p : Node2D):
 	player = p
@@ -63,6 +73,9 @@ func TeleportationEffect(listOfTargets : Array):
 	pass # teleports player to contact position 
 
 func GravityShift(listOfTargets : Array): # @TODO
+	for body in listOfTargets:
+		if body == player:
+			body.SetGravityMod(2) # high number = decrease in grav, low = increase in grav
 	pass # Alters gravity by a modifier
 
 func ReverseGravityPotion(player : RigidBody2D, gravity_scale : float, listOfTargets : Array):
@@ -71,8 +84,12 @@ func ReverseGravityPotion(player : RigidBody2D, gravity_scale : float, listOfTar
 func StickyPotion(listOfTargets : Array):
 	pass # makes the player stick to things
 	
-func SpawnBlockPotion(contact : Node2D):
+func SpawnBlockPotion(listOfTargets : Array):
+	var newBlock = blockSet.pick_random().instantiate();
+	root.add_child(newBlock);
+	newBlock.global_position = explosionPosition
 	pass # #Spawns block next to the contact point
+
 
 func AreaDeleterPotion(listOfTargets : Array):
 	for body in listOfTargets:
@@ -84,7 +101,6 @@ func AreaDeleterPotion(listOfTargets : Array):
 func GrowthEffectPotion(listOfTargets : Array):
 	for body in listOfTargets:
 		var dir : Vector2 = (body.global_position - explosionPosition).normalized()
-		print(body)
 		if body != player:
 			body.get_parent().SetScale(0.5)
 	pass #all blocks Grow
@@ -93,9 +109,23 @@ func EarthquakeEffectPotion(listOfTargets : Array):
 	pass #all blocks shake
 
 func MagnatismEffectPotion(listOfTargets : Array):
+	for body in listOfTargets:
+		var dir : Vector2 = (explosionPosition - body.global_position).normalized()
+		if body == player:
+			# Preferential scaling of the Y axis
+			var x_scale = 0.5 # Scaling factor for X axis, between 0 and 1
+			var y_scale = 1.5 # Scaling factor for Y axis, typically 1 or higher
+			# Scale the direction vector
+			var scaled_dir = Vector2(dir.x * x_scale, dir.y * y_scale)
+			body.AddForces(scaled_dir, explosionForce*20)
+		else:
+			body.apply_impulse(dir * explosionForce*25)
 	pass # all blocks come together (find center point)
 
-func JumpBoostPotion(player : Node2D, listOfTargets : Array):
+func JumpBoostPotion(listOfTargets : Array): #basically the lower grav mod
+	for body in listOfTargets:
+		if body == player:
+			body.SetJumpMod(2)
 	pass #typical
 
 func SpeedUpPotion(player : Node2D, listOfTargets : Array):

@@ -21,3 +21,4 @@ var jumping = false;
 var wallSliding = false;
 var floorWallTiles;
 var alive = true;
+var canCastShadow = true
