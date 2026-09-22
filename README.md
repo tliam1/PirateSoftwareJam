@@ -1,2 +1,2 @@
 # PirateSoftwareJam
- GameJamSubmissionForPirateSoftware
+ Game Jam Submission For Pirate Software
